@@ -1,0 +1,239 @@
+# Reading the Logs with AI Agent
+
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        80
+      ],
+      "id": "ea543614-758e-4b50-b151-a3b2975b1a66",
+      "name": "When chat message received",
+      "webhookId": "c2a33b54-c450-4507-8386-cd0574bced65"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Prompt: SSH Security Log Analysis\nObjective: Analyze SSH authentication logs (auth.log) to detect anomalies, failed login attempts, unauthorized access, and brute-force attacks. Use RFC 4252 as a reference for Secure Shell Authentication standards.\n\nInstructions for AI:\n\nExtract & Parse Data:\n\nIdentify SSH authentication attempts (success/failure).\nExtract timestamps, usernames, IP addresses, and authentication methods.\nHighlight repeated failed attempts from the same IP address.\nDetect Anomalies & Security Risks:\n\nIdentify brute-force attempts (multiple failures in a short time window).\nDetect logins from unusual locations (GeoIP lookup if possible).\nFlag failed attempts with invalid usernames.\nIdentify potential session hijacking or man-in-the-middle attacks.\nReference RFC 4252 Guidelines:\n\nValidate authentication methods (public key, password, keyboard-interactive).\nEnsure compliance with SSH authentication security best practices.\nIdentify deprecated or insecure authentication methods.\nProvide a Summary Report:\n\nTotal authentication attempts (successful vs. failed).\nList of suspicious IPs with frequency of failed attempts.\nHighlight any unusual behavior or security concerns.\nOutput Format:\n\nTabular summary of login attempts.\nFlagged suspicious IPs with reasons.\nRecommendations for SSH security hardening (e.g., fail2ban, key-based auth, disabling root login).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "14376766-e534-4391-9049-e943a7c84fb4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -140,
+        280
+      ],
+      "id": "305d4474-0fae-4357-950a-ea5634e4055d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Xz8w3CGuUFIVVPS9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "LogInformation",
+        "description": "Call this tool to access information to answer users questions"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        400,
+        180
+      ],
+      "id": "b8c51d84-dcdb-4ca8-908f-e3dafa6598db",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        460
+      ],
+      "id": "fa062297-91ef-4a63-b182-7897555ef4c7",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Xz8w3CGuUFIVVPS9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8ncontact",
+          "mode": "list",
+          "cachedResultName": "n8ncontact"
+        },
+        "options": {
+          "pineconeNamespace": "wazoLogs"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        220,
+        400
+      ],
+      "id": "9b44b40b-e29d-4ea6-8440-12a35a014e3f",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "EVH7qYDApyT9Fq3a",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        640
+      ],
+      "id": "59bd7b71-bb57-4305-b291-cbd751cfe5f3",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "Xz8w3CGuUFIVVPS9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        220
+      ],
+      "id": "3e315083-1153-4876-acba-5e0606781e46",
+      "name": "Window Buffer Memory",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  }
+}
